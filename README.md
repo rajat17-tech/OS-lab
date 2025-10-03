@@ -41,54 +41,119 @@ graph TD
 ## 🔄 CPU Scheduling Algorithm Flow
 
 ### FCFS (First-Come-First-Served) Flowchart
-```mermaid
-flowchart TD
-    Start[Start FCFS] --> Load[Load Processes]
-    Load --> Sort[Sort by Arrival Time]
-    Sort --> InitVars[Initialize Variables:<br/>time = 0, results = []]
-    InitVars --> CheckQueue{Processes in queue?}
-    
-    CheckQueue -->|Yes| GetNext[Get Next Process]
-    GetNext --> CheckArrival{Process arrived?}
-    CheckArrival -->|No| Wait[Wait until arrival<br/>time = arrival_time]
-    CheckArrival -->|Yes| Execute[Execute Process]
-    
-    Wait --> Execute
-    Execute --> Calculate[Calculate Metrics:<br/>start_time, finish_time,<br/>waiting_time, turnaround_time]
-    Calculate --> Update[Update Time:<br/>time = finish_time]
-    Update --> Store[Store Results]
-    Store --> CheckQueue
-    
-    CheckQueue -->|No| ComputeAvg[Compute Averages:<br/>avg_waiting_time,<br/>avg_turnaround_time]
-    ComputeAvg --> Render[Render Gantt Chart]
-    Render --> Display[Display Results Table]
-    Display --> End[End FCFS]
+```
+┌─────────────────┐
+│   Start FCFS    │
+└─────────────────┘
+         ↓
+┌─────────────────┐
+│  Load Processes │
+└─────────────────┘
+         ↓
+┌─────────────────┐
+│ Sort by Arrival │
+└─────────────────┘
+         ↓
+┌─────────────────┐
+│ Initialize Vars │
+│ time=0, results=│
+└─────────────────┘
+         ↓
+┌─────────────────┐
+│ Processes in    │
+│    queue?       │
+└─────────────────┘
+    ↓Yes        ↓No
+┌─────────┐   ┌─────────────────┐
+│Get Next │   │ Compute Averages│
+│Process  │   └─────────────────┘
+└─────────┘           ↓
+    ↓           ┌─────────────────┐
+┌─────────┐     │ Render Gantt    │
+│Process  │     │     Chart       │
+│arrived? │     └─────────────────┘
+└─────────┘           ↓
+    ↓Yes        ↓No   ┌─────────────────┐
+┌─────────┐   ┌─────┐ │ Display Results │
+│Execute  │←──│Wait │ └─────────────────┘
+│Process  │   └─────┘         ↓
+└─────────┐           ┌─────────────────┐
+    ↓                 │    End FCFS     │
+┌─────────┐           └─────────────────┘
+│Calculate│
+│Metrics  │
+└─────────┘
+    ↓
+┌─────────┐
+│Update   │
+│Time     │
+└─────────┘
+    ↓
+┌─────────┐
+│Store    │
+│Results  │
+└─────────┘
+    ↓
+    ←─────────┐
 ```
 
 ### SJF (Shortest-Job-First) Flowchart
-```mermaid
-flowchart TD
-    Start[Start SJF] --> Load[Load Processes]
-    Load --> InitVars[Initialize Variables:<br/>time = 0, completed = 0, results = []]
-    InitVars --> CheckComplete{All processes completed?}
-    
-    CheckComplete -->|No| FindAvailable[Find available processes<br/>(arrival_time ≤ current_time)]
-    FindAvailable --> CheckAvailable{Avaliable processes found?}
-    
-    CheckAvailable -->|Yes| SortByBurst[Sort by Burst Time]
-    SortByBurst --> GetShortest[Get Shortest Job]
-    GetShortest --> Execute[Execute Process]
-    
-    CheckAvailable -->|No| AdvanceTime[Advance Time to<br/>next arrival]
-    AdvanceTime --> FindAvailable
-    
-    Execute --> Calculate[Calculate Metrics]
-    Calculate --> Update[Update Time & Counters]
-    Update --> CheckComplete
-    
-    CheckComplete -->|Yes| ComputeAvg[Compute Averages]
-    ComputeAvg --> Render[Render Results]
-    Render --> End[End SJF]
+```
+┌─────────────────┐
+│    Start SJF    │
+└─────────────────┘
+         ↓
+┌─────────────────┐
+│  Load Processes │
+└─────────────────┘
+         ↓
+┌─────────────────┐
+│ Initialize Vars │
+│ time=0, completed│
+└─────────────────┘
+         ↓
+┌─────────────────┐
+│   All processes │
+│   completed?    │
+└─────────────────┘
+    ↓No         ↓Yes
+┌─────────┐   ┌─────────────────┐
+│Find     │   │ Compute Averages│
+│Available│   └─────────────────┘
+└─────────┘           ↓
+    ↓           ┌─────────────────┐
+┌─────────┐     │  Render Results │
+│Available│     └─────────────────┘
+│found?   │           ↓
+└─────────┘   ┌─────────────────┐
+    ↓Yes   ↓No│    End SJF      │
+┌─────────┐   └─────────────────┘
+│Sort by  │
+│Burst    │
+└─────────┘
+    ↓
+┌─────────┐
+│Get      │
+│Shortest │
+└─────────┘
+    ↓
+┌─────────┐
+│Execute  │
+│Process  │
+└─────────┘
+    ↓
+┌─────────┐
+│Calculate│
+│Metrics  │
+└─────────┘
+    ↓
+┌─────────┐
+│Update   │
+│Time &   │
+│Counters │
+└─────────┘
+    ↓
+    ←─────────┐
 ```
 
 ## ⚙️ Synchronization Simulator Architecture
@@ -121,41 +186,31 @@ flowchart TD
 
 ### Dining Philosophers Algorithm Comparison
 ```mermaid
-flowchart LR
-    subgraph Naive Approach
+flowchart TB
+    subgraph NaiveApproach [Naive Approach - Deadlock Possible]
         A[Philosopher i] --> B[Pick up left fork]
         B --> C[Pick up right fork]
         C --> D[Eat]
         D --> E[Release both forks]
     end
     
-    subgraph Ordered Approach
+    subgraph OrderedApproach [Ordered Approach - Deadlock Free]
         F[Philosopher i] --> G[Pick up lower-numbered fork]
         G --> H[Pick up higher-numbered fork]
         H --> I[Eat]
         I --> J[Release both forks]
     end
-    
-    K[DEADLOCK POSSIBLE] --> A
-    L[DEADLOCK FREE] --> F
 ```
 
-## 📈 Performance Metrics & Graphs
+## 📈 Performance Metrics & Tables
 
 ### Algorithm Comparison Metrics
-```
-CPU Scheduling Algorithms Performance Comparison
-┌─────────────────┬─────────────┬──────────────┬─────────────┬─────────────┐
-│   Algorithm     │ Avg Waiting │ Avg Turnaround│ Throughput  │ CPU Utilization │
-│                 │    Time     │     Time      │ (processes/ │      (%)       │
-│                 │   (units)   │    (units)    │   unit time)│                │
-├─────────────────┼─────────────┼──────────────┼─────────────┼─────────────┤
-│      FCFS       │    12.4     │     18.2      │     0.55    │     92.5     │
-│      SJF        │     8.7     │     14.5      │     0.69    │     95.8     │
-│      RMS        │    10.2     │     16.1      │     0.62    │     88.3     │
-│      EDF        │     9.8     │     15.7      │     0.64    │     91.2     │
-└─────────────────┴─────────────┴──────────────┴─────────────┴─────────────┘
-```
+| Algorithm | Avg Waiting Time | Avg Turnaround Time | Throughput | CPU Utilization |
+|-----------|------------------|---------------------|------------|-----------------|
+| FCFS      | 12.4 units       | 18.2 units          | 0.55       | 92.5%           |
+| SJF       | 8.7 units        | 14.5 units          | 0.69       | 95.8%           |
+| RMS       | 10.2 units       | 16.1 units          | 0.62       | 88.3%           |
+| EDF       | 9.8 units        | 15.7 units          | 0.64       | 91.2%           |
 
 ### Gantt Chart Visualization Example
 ```
@@ -174,20 +229,15 @@ Time:   0     2     6     11    16
         └─────┘ └─────────┘ └─────┘
 ```
 
-### Real-time Scheduling Feasibility Graph
-```mermaid
-graph LR
-    subgraph RMS Feasibility
-        A[U ≤ n2^1/n - 1] --> B[2 Tasks: U ≤ 0.828]
-        A --> C[3 Tasks: U ≤ 0.779]
-        A --> D[4 Tasks: U ≤ 0.756]
-        A --> E[∞ Tasks: U ≤ 0.693]
-    end
-    
-    subgraph EDF Feasibility
-        F[U ≤ 1.0] --> G[Always feasible if<br/>U ≤ 100%]
-    end
-```
+### Real-time Scheduling Feasibility
+**RMS (Rate Monotonic Scheduling)**
+- 2 Tasks: U ≤ 0.828
+- 3 Tasks: U ≤ 0.779  
+- 4 Tasks: U ≤ 0.756
+- ∞ Tasks: U ≤ 0.693
+
+**EDF (Earliest Deadline First)**
+- Always feasible if U ≤ 1.0 (100%)
 
 ## 🔧 Technical Implementation Flow
 
@@ -224,8 +274,8 @@ sequenceDiagram
 
 ### Data Flow in CPU Scheduler
 ```mermaid
-flowchart TD
-    UserInput[User Input:<br/>Process ID, Arrival, Burst] --> Validation[Input Validation]
+flowchart LR
+    UserInput[User Input] --> Validation[Input Validation]
     Validation --> DataStore[Store in Process Table]
     DataStore --> AlgorithmSelect[Algorithm Selection]
     
@@ -245,39 +295,35 @@ flowchart TD
     TableUpdate --> VisualUpdate
 ```
 
-## 📊 Performance Analysis Graphs
+## 📊 Performance Analysis Tables
 
 ### Waiting Time Distribution
-```
-WAITING TIME COMPARISON - FCFS vs SJF
-Process │ FCFS Wait │ SJF Wait │ Improvement
-────────┼───────────┼───────────┼────────────
-   P1   │     0     │    11     │    -11
-   P2   │    10     │     2     │     +8
-   P3   │    15     │     5     │    +10
-   P4   │    25     │    15     │    +10
-Average │   12.5    │    8.25   │    +4.25
-```
+| Process | FCFS Wait Time | SJF Wait Time | Improvement |
+|---------|----------------|---------------|-------------|
+| P1      | 0 units        | 11 units      | -11 units   |
+| P2      | 10 units       | 2 units       | +8 units    |
+| P3      | 15 units       | 5 units       | +10 units   |
+| P4      | 25 units       | 15 units      | +10 units   |
+| **Average** | **12.5 units** | **8.25 units** | **+4.25 units** |
 
 ### CPU Utilization Over Time
-```
-CPU UTILIZATION TIMELINE
-Time: 0-5  5-10  10-15  15-20  20-25  25-30
-FCFS: 100%  80%   100%   60%    100%   70%
-SJF:  100%  100%  100%   100%   80%    100%
-```
+| Time Slot | FCFS Utilization | SJF Utilization |
+|-----------|------------------|-----------------|
+| 0-5 units | 100%             | 100%            |
+| 5-10 units| 80%              | 100%            |
+| 10-15 units| 100%             | 100%            |
+| 15-20 units| 60%              | 100%            |
+| 20-25 units| 100%             | 80%             |
+| 25-30 units| 70%              | 100%            |
 
 ### Synchronization Problem States
-```
-DINING PHILOSOPHERS - STATE TRANSITIONS
-Philosopher │ State 1 │ State 2 │ State 3 │ State 4
-────────────┼─────────┼─────────┼─────────┼─────────
-   P1       │ Thinking│ Hungry  │ Eating  │ Thinking
-   P2       │ Thinking│ Thinking│ Hungry  │ Eating  
-   P3       │ Eating  │ Thinking│ Thinking│ Hungry
-   P4       │ Hungry  │ Eating  │ Thinking│ Thinking
-   P5       │ Thinking│ Hungry  │ Eating  │ Thinking
-```
+| Philosopher | State 1   | State 2   | State 3   | State 4   |
+|-------------|-----------|-----------|-----------|-----------|
+| P1          | Thinking  | Hungry    | Eating    | Thinking  |
+| P2          | Thinking  | Thinking  | Hungry    | Eating    |
+| P3          | Eating    | Thinking  | Thinking  | Hungry    |
+| P4          | Hungry    | Eating    | Thinking  | Thinking  |
+| P5          | Thinking  | Hungry    | Eating    | Thinking  |
 
 ## 🎮 User Interaction Flow
 
@@ -317,12 +363,25 @@ flowchart TD
     Repeat --> Choose
 ```
 
-This comprehensive documentation with flowcharts and graphs provides:
+## 🛠️ File Structure
+```
+operating-system-simulators/
+│
+├── 📄 index.html              # Main hub - Landing page
+├── ⚡ cpu-scheduler.html      # CPU scheduling algorithms
+├── 📚 os-demo1.html          # OS concepts and system calls  
+├── ⏰ rms-edf-scheduler.html # Real-time scheduling
+├── 🔄 sync-sim.html          # Synchronization problems
+└── 📖 README.md              # Documentation
+```
 
-1. **System Architecture** - Overall project structure
-2. **Algorithm Flows** - Step-by-step execution paths
-3. **Performance Metrics** - Quantitative comparisons
-4. **Technical Implementation** - Code execution sequences
-5. **User Journey** - Complete interaction flow
+## 🎯 Key Features Summary
 
-Each flowchart and graph serves as both documentation and learning aid, helping users understand both the "how" and "why" behind each operating system concept.
+| Simulator | Core Algorithms | Visualizations | Educational Focus |
+|-----------|-----------------|----------------|-------------------|
+| CPU Scheduler | FCFS, SJF | Gantt Charts, Metrics | Scheduling efficiency |
+| OS Visual Guide | System Calls | Process Flow, Logging | OS architecture |
+| RMS & EDF | Rate Monotonic, EDF | Threads, Feasibility | Real-time constraints |
+| Sync Simulator | Semaphores, Locks | State Diagrams | Concurrency control |
+
+This documentation provides comprehensive flowcharts and graphs that are GitHub-compatible while maintaining the educational value and technical depth needed for understanding operating system concepts.
