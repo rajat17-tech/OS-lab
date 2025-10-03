@@ -1,0 +1,1031 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Synchronization Simulations — Producer/Consumer, Dining Philosophers, Readers/Writers</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<style>
+  :root {
+    --primary: #60a5fa;
+    --secondary: #7dd3fc;
+    --accent: #f97316;
+    --success: #34d399;
+    --danger: #fb7185;
+    --warning: #fbbf24;
+    --light: #f8fafc;
+    --dark: #0f172a;
+    --muted: #94a3b8;
+    --card-bg: rgba(255, 255, 255, 0.08);
+    --glass: rgba(255, 255, 255, 0.05);
+    --gradient: linear-gradient(135deg, #0f172a, #0f4060 40%, #073b37 100%);
+    --shadow: 0 10px 30px rgba(2, 6, 23, 0.6);
+    --radius: 16px;
+  }
+
+  * {
+    box-sizing: border-box;
+    font-family: 'Inter', system-ui, -apple-system, Segoe UI, Roboto, "Helvetica Neue", Arial, sans-serif;
+  }
+
+  body {
+    margin: 0;
+    min-height: 100vh;
+    background: var(--gradient);
+    color: #e6eef8;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 28px;
+  }
+
+  .container {
+    max-width: 1300px;
+    width: 100%;
+  }
+
+  header {
+    width: 100%;
+    margin-bottom: 28px;
+    text-align: center;
+  }
+
+  h1 {
+    margin: 0;
+    font-weight: 800;
+    letter-spacing: -0.5px;
+    font-size: 2.8rem;
+    background: linear-gradient(to right, var(--primary), var(--success));
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 15px;
+  }
+
+  .tagline {
+    margin: 10px 0 0;
+    color: var(--muted);
+    font-size: 1.2rem;
+    max-width: 800px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+
+  .grid {
+    display: grid;
+    gap: 25px;
+    width: 100%;
+    grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+  }
+
+  .card {
+    background: var(--card-bg);
+    border-radius: var(--radius);
+    padding: 24px;
+    box-shadow: var(--shadow);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 15px 40px rgba(2, 6, 23, 0.8);
+  }
+
+  .card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 20px;
+  }
+
+  .card-title {
+    margin: 0;
+    font-size: 1.5rem;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .card-title i {
+    color: var(--primary);
+  }
+
+  .card-subtitle {
+    color: var(--muted);
+    font-size: 0.9rem;
+    margin-top: 5px;
+  }
+
+  .controls {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    flex-wrap: wrap;
+  }
+
+  .btn {
+    border: 0;
+    padding: 10px 16px;
+    border-radius: 10px;
+    background: var(--primary);
+    color: #022;
+    cursor: pointer;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+  }
+
+  .btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.3);
+  }
+
+  .btn-success {
+    background: var(--success);
+  }
+
+  .btn-warning {
+    background: var(--warning);
+    color: var(--dark);
+  }
+
+  .btn-danger {
+    background: var(--danger);
+  }
+
+  .btn-small {
+    padding: 8px 12px;
+    font-size: 0.85rem;
+  }
+
+  .toggle-btn {
+    background: var(--glass);
+    color: var(--muted);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+  }
+
+  .toggle-btn.active {
+    background: var(--success);
+    color: var(--dark);
+  }
+
+  .slider-container {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: var(--glass);
+    padding: 8px 12px;
+    border-radius: 10px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+  }
+
+  .slider-container label {
+    font-size: 0.85rem;
+    color: var(--muted);
+    white-space: nowrap;
+  }
+
+  .slider {
+    width: 100px;
+  }
+
+  /* Producer Consumer */
+  .pc-area {
+    display: flex;
+    gap: 20px;
+    align-items: flex-start;
+    margin-top: 15px;
+  }
+
+  .buffer-container {
+    flex: 1;
+  }
+
+  .buffer-controls {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    margin-bottom: 15px;
+  }
+
+  .buffer-label {
+    font-size: 0.9rem;
+    color: var(--muted);
+    margin-right: 10px;
+  }
+
+  .buffer {
+    display: flex;
+    gap: 10px;
+    padding: 15px;
+    border-radius: 12px;
+    background: rgba(0, 0, 0, 0.2);
+    justify-content: center;
+    min-height: 120px;
+    align-items: center;
+  }
+
+  .slot {
+    width: 60px;
+    height: 60px;
+    border-radius: 10px;
+    border: 2px dashed rgba(255, 255, 255, 0.1);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    color: var(--muted);
+    background: rgba(255, 255, 255, 0.05);
+    transition: all 0.3s ease;
+  }
+
+  .slot.full {
+    border-style: solid;
+    background: linear-gradient(135deg, var(--primary), var(--secondary));
+    color: #041124;
+    animation: pop 300ms ease;
+    box-shadow: 0 4px 12px rgba(96, 165, 250, 0.3);
+  }
+
+  @keyframes pop {
+    0% { transform: scale(0.85); }
+    100% { transform: scale(1); }
+  }
+
+  .actor-list {
+    width: 240px;
+  }
+
+  .actor {
+    display: flex;
+    gap: 12px;
+    align-items: center;
+    padding: 10px 12px;
+    border-radius: 10px;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    margin-bottom: 8px;
+    transition: all 0.3s ease;
+  }
+
+  .actor:hover {
+    background: rgba(255, 255, 255, 0.08);
+  }
+
+  .actor .bubble {
+    min-width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: #fff;
+    color: #062;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 800;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+  }
+
+  .actor.producer .bubble {
+    background: var(--success);
+    color: white;
+  }
+
+  .actor.consumer .bubble {
+    background: var(--warning);
+    color: var(--dark);
+  }
+
+  .actor-status {
+    font-size: 0.85rem;
+    color: var(--muted);
+  }
+
+  /* Dining Philosophers */
+  .dp-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin-top: 15px;
+  }
+
+  .circle-wrap {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+  }
+
+  .table {
+    position: relative;
+    width: 380px;
+    height: 380px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #07203a, #042a2e);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+  }
+
+  .philo {
+    position: absolute;
+    width: 90px;
+    height: 90px;
+    border-radius: 12px;
+    background: linear-gradient(135deg, #111827, #0b1220);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--muted);
+    flex-direction: column;
+    padding: 10px;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    transition: all 0.5s ease;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+  }
+
+  .philo.on {
+    background: linear-gradient(135deg, var(--success), #059669);
+    color: #022;
+    box-shadow: 0 6px 20px rgba(52, 211, 153, 0.4);
+  }
+
+  .fork {
+    position: absolute;
+    width: 14px;
+    height: 64px;
+    background: linear-gradient(135deg, #f59e0b, #b45309);
+    border-radius: 7px;
+    left: 50%;
+    top: 50%;
+    transform-origin: top center;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+  }
+
+  /* Readers Writers */
+  .rw-area {
+    display: flex;
+    gap: 20px;
+    align-items: flex-start;
+    margin-top: 15px;
+  }
+
+  .rw-controls {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    margin-bottom: 15px;
+  }
+
+  .shared-container {
+    flex: 1;
+  }
+
+  .shared {
+    padding: 20px;
+    border-radius: 12px;
+    background: rgba(0, 0, 0, 0.2);
+    text-align: center;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+  }
+
+  .shared-title {
+    font-weight: 700;
+    font-size: 1.1rem;
+    margin-bottom: 10px;
+  }
+
+  .shared-value {
+    font-size: 2rem;
+    font-weight: 800;
+    margin: 10px 0;
+    color: var(--primary);
+  }
+
+  .badge {
+    display: inline-block;
+    padding: 8px 14px;
+    border-radius: 20px;
+    background: var(--glass);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    color: var(--muted);
+    font-weight: 600;
+  }
+
+  .badge.active {
+    background: var(--primary);
+    color: #041124;
+  }
+
+  .rw-list {
+    width: 280px;
+  }
+
+  .legend {
+    display: flex;
+    gap: 15px;
+    align-items: center;
+    flex-wrap: wrap;
+    margin-top: 20px;
+    padding-top: 15px;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+  }
+
+  .legend-item {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    font-size: 0.85rem;
+    color: var(--muted);
+  }
+
+  .box {
+    width: 16px;
+    height: 16px;
+    border-radius: 4px;
+  }
+
+  .green { background: var(--success); }
+  .red { background: var(--danger); }
+  .blue { background: var(--primary); }
+  .orange { background: var(--accent); }
+
+  footer {
+    margin-top: 40px;
+    color: var(--muted);
+    font-size: 0.9rem;
+    text-align: center;
+    padding: 20px;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+    width: 100%;
+    max-width: 1200px;
+  }
+
+  @media (max-width: 768px) {
+    .grid {
+      grid-template-columns: 1fr;
+    }
+    
+    .pc-area, .rw-area {
+      flex-direction: column;
+    }
+    
+    .actor-list, .rw-list {
+      width: 100%;
+    }
+    
+    .table {
+      width: 300px;
+      height: 300px;
+    }
+    
+    h1 {
+      font-size: 2.2rem;
+    }
+  }
+</style>
+</head>
+<body>
+<div class="container">
+  <header>
+    <h1><i class="fas fa-sync-alt"></i> Synchronization Visualizer</h1>
+    <p class="tagline">Producer–Consumer • Dining Philosophers • Readers–Writers — Toggle synchronization to see race conditions vs correct behavior</p>
+  </header>
+
+  <div class="grid">
+
+    <!-- Producer Consumer -->
+    <section class="card">
+      <div class="card-header">
+        <div>
+          <h2 class="card-title"><i class="fas fa-exchange-alt"></i> Producer — Consumer</h2>
+          <div class="card-subtitle">Bounded Buffer with semaphores for empty/full and a mutex lock</div>
+        </div>
+        <div class="controls">
+          <div class="slider-container">
+            <label>Sync</label>
+            <button id="pc-sync-toggle" class="btn btn-small toggle-btn active">ON</button>
+          </div>
+          <div class="slider-container">
+            <label><i class="fas fa-tachometer-alt"></i></label>
+            <input id="pc-speed" class="slider" type="range" min="100" max="1200" value="500">
+          </div>
+          <button id="pc-start" class="btn btn-success btn-small"><i class="fas fa-play"></i> Start</button>
+          <button id="pc-stop" class="btn btn-danger btn-small"><i class="fas fa-stop"></i> Stop</button>
+        </div>
+      </div>
+
+      <div class="pc-area">
+        <div class="buffer-container">
+          <div class="buffer-controls">
+            <span class="buffer-label">Actors:</span>
+            <button id="pc-add-producer" class="btn btn-small"><i class="fas fa-plus"></i> Producer</button>
+            <button id="pc-rem-producer" class="btn btn-small"><i class="fas fa-minus"></i> Producer</button>
+            <button id="pc-add-consumer" class="btn btn-small"><i class="fas fa-plus"></i> Consumer</button>
+            <button id="pc-rem-consumer" class="btn btn-small"><i class="fas fa-minus"></i> Consumer</button>
+          </div>
+          <div class="buffer" id="pc-buffer"></div>
+        </div>
+
+        <div class="actor-list">
+          <div style="font-size:0.9rem; margin-bottom:10px; color:var(--muted)">Active Actors</div>
+          <div id="pc-actors"></div>
+        </div>
+      </div>
+      
+      <div class="legend">
+        <div class="legend-item"><span class="box green"></span> Produced (in buffer)</div>
+        <div class="legend-item"><span class="box red"></span> Blocked actor</div>
+        <div class="legend-item"><span class="box blue"></span> Mutex locked</div>
+      </div>
+    </section>
+
+    <!-- Dining Philosophers -->
+    <section class="card">
+      <div class="card-header">
+        <div>
+          <h2 class="card-title"><i class="fas fa-utensils"></i> Dining Philosophers</h2>
+          <div class="card-subtitle">Left/right forks are locks — try naive (deadlock) vs ordered locking (no deadlock)</div>
+        </div>
+        <div class="controls">
+          <div class="slider-container">
+            <label>Mode</label>
+            <button id="dp-mode-toggle" class="btn btn-small toggle-btn active">ORDERED</button>
+          </div>
+          <div class="slider-container">
+            <label><i class="fas fa-tachometer-alt"></i></label>
+            <input id="dp-speed" class="slider" type="range" min="100" max="1400" value="700">
+          </div>
+          <button id="dp-start" class="btn btn-success btn-small"><i class="fas fa-play"></i> Start</button>
+          <button id="dp-stop" class="btn btn-danger btn-small"><i class="fas fa-stop"></i> Stop</button>
+        </div>
+      </div>
+
+      <div class="dp-container">
+        <div class="circle-wrap">
+          <div class="table" id="dp-table">
+            <!-- philosophers & forks rendered by JS -->
+          </div>
+        </div>
+        <div style="color: var(--muted); font-size: 0.9rem; margin-top: 15px; text-align: center;">
+          <i class="fas fa-circle" style="color: var(--success);"></i> Eating • 
+          <i class="fas fa-circle" style="color: var(--muted);"></i> Thinking • 
+          Fork visible when available
+        </div>
+      </div>
+    </section>
+
+    <!-- Readers Writers -->
+    <section class="card">
+      <div class="card-header">
+        <div>
+          <h2 class="card-title"><i class="fas fa-book-reader"></i> Readers — Writers</h2>
+          <div class="card-subtitle">Demonstrates reader-preference vs lock-based writers-first modes</div>
+        </div>
+        <div class="controls">
+          <div class="slider-container">
+            <label>Mode</label>
+            <button id="rw-mode-toggle" class="btn btn-small toggle-btn active">READER-PREF</button>
+          </div>
+          <div class="slider-container">
+            <label><i class="fas fa-tachometer-alt"></i></label>
+            <input id="rw-speed" class="slider" type="range" min="100" max="1200" value="600">
+          </div>
+          <button id="rw-start" class="btn btn-success btn-small"><i class="fas fa-play"></i> Start</button>
+          <button id="rw-stop" class="btn btn-danger btn-small"><i class="fas fa-stop"></i> Stop</button>
+        </div>
+      </div>
+
+      <div class="rw-area">
+        <div class="shared-container">
+          <div class="rw-controls">
+            <button id="rw-add-reader" class="btn btn-small"><i class="fas fa-plus"></i> Reader</button>
+            <button id="rw-rem-reader" class="btn btn-small"><i class="fas fa-minus"></i> Reader</button>
+            <button id="rw-add-writer" class="btn btn-small"><i class="fas fa-plus"></i> Writer</button>
+            <button id="rw-rem-writer" class="btn btn-small"><i class="fas fa-minus"></i> Writer</button>
+          </div>
+          <div class="shared">
+            <div class="shared-title">Shared Resource</div>
+            <div class="shared-value" id="shared-val">0</div>
+            <div style="margin-top: 15px;">
+              <span class="badge" id="rw-status">Idle</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="rw-list">
+          <div style="font-size:0.9rem; margin-bottom:10px; color:var(--muted)">Active Actors</div>
+          <div id="rw-list"></div>
+        </div>
+      </div>
+      
+      <div style="color: var(--muted); font-size: 0.9rem; margin-top: 15px;">
+        Toggle modes to see starvation or correctness differences.
+      </div>
+    </section>
+
+  </div>
+
+  <footer>
+    <p><i class="fas fa-lightbulb"></i> Save this file and open with <strong>Live Server</strong> extension in VS Code • Controls show sync vs naive behavior</p>
+  </footer>
+</div>
+
+<script>
+/* -------------------------
+   Utility: Async Semaphore
+   ------------------------- */
+class Semaphore {
+  constructor(n=1){
+    this.count = n;
+    this.waiters = [];
+  }
+  async acquire(){
+    if (this.count > 0) { this.count--; return; }
+    await new Promise(res => this.waiters.push(res));
+  }
+  release(){
+    if (this.waiters.length>0){
+      const r = this.waiters.shift();
+      r();
+    } else {
+      this.count++;
+    }
+  }
+}
+
+/* -------------------------
+   Producer–Consumer
+   ------------------------- */
+const pc = {
+  bufferSize:6, buffer:[], producers:1, consumers:1,
+  mutex: new Semaphore(1), empty: null, full: null,
+  running:false, sync:true, speed:500,
+  actors:[],
+  async producerLoop(id){
+    const actor = {id, type:'P', status:'idle'};
+    pc.actors.push(actor);
+    const produce = async () => {
+      actor.status='producing';
+      renderPCActors();
+      await sleep(pc.speed*0.5);
+      if (pc.sync){
+        await pc.empty.acquire();
+        await pc.mutex.acquire();
+      }
+      // critical section: add item
+      const item = 'I'+Math.floor(Math.random()*90+10);
+      pc.buffer.push(item);
+      actor.status='produced';
+      renderBuffer();
+      renderPCActors();
+      if (pc.sync){
+        pc.mutex.release();
+        pc.full.release();
+      }
+      await sleep(pc.speed*0.5);
+      actor.status='idle';
+      renderPCActors();
+    };
+    while(pc.running){
+      await produce();
+      await sleep(pc.speed + Math.random()*pc.speed);
+    }
+    // cleanup on stop
+    pc.actors = pc.actors.filter(a=>a!==actor);
+    renderPCActors();
+  },
+  async consumerLoop(id){
+    const actor = {id, type:'C', status:'idle'};
+    pc.actors.push(actor);
+    const consume = async () => {
+      actor.status='consuming';
+      renderPCActors();
+      await sleep(pc.speed*0.5);
+      if (pc.sync){
+        await pc.full.acquire();
+        await pc.mutex.acquire();
+      }
+      // critical: remove
+      let item = null;
+      if (pc.buffer.length>0) item = pc.buffer.shift();
+      actor.status = item ? 'consumed' : 'blocked';
+      renderBuffer();
+      renderPCActors();
+      if (pc.sync){
+        pc.mutex.release();
+        pc.empty.release();
+      }
+      await sleep(pc.speed*0.5);
+      actor.status='idle';
+      renderPCActors();
+    };
+    while(pc.running){
+      await consume();
+      await sleep(pc.speed + Math.random()*pc.speed);
+    }
+    pc.actors = pc.actors.filter(a=>a!==actor);
+    renderPCActors();
+  }
+};
+
+// UI render helpers for PC
+const pcBufferEl = document.getElementById('pc-buffer');
+const pcActorsEl = document.getElementById('pc-actors');
+function renderBuffer(){
+  pcBufferEl.innerHTML = '';
+  for(let i=0;i<pc.bufferSize;i++){
+    const slot = document.createElement('div');
+    slot.className = 'slot';
+    if (i < pc.buffer.length){
+      slot.classList.add('full');
+      slot.textContent = pc.buffer[i];
+    } else {
+      slot.textContent = '';
+    }
+    pcBufferEl.appendChild(slot);
+  }
+}
+function renderPCActors(){
+  pcActorsEl.innerHTML = '';
+  pc.actors.forEach(a=>{
+    const row = document.createElement('div'); 
+    row.className = `actor ${a.type === 'P' ? 'producer' : 'consumer'}`;
+    
+    const bubble = document.createElement('div'); 
+    bubble.className='bubble';
+    bubble.textContent = a.type;
+    
+    const txt = document.createElement('div'); 
+    txt.innerHTML = `
+      <div style="font-weight:700; font-size: 0.95rem;">${a.type}${a.id}</div>
+      <div class="actor-status">${a.status}</div>
+    `;
+    
+    row.appendChild(bubble); 
+    row.appendChild(txt); 
+    pcActorsEl.appendChild(row);
+  });
+}
+
+/* -------------------------
+   Dining Philosophers
+   ------------------------- */
+const dp = {
+  n:5, forks:[], philoStates:[], running:false, ordered:true, speed:700,
+  init(){
+    dp.forks = Array.from({length:dp.n},()=>new Semaphore(1));
+    dp.philoStates = Array.from({length:dp.n},()=>({state:'thinking'}));
+    dp.render();
+  },
+  async philosopher(i){
+    while(dp.running){
+      // think
+      dp.philoStates[i].state = 'thinking'; dp.render();
+      await sleep(dp.speed + Math.random()*dp.speed);
+      dp.philoStates[i].state = 'hungry'; dp.render();
+      // try to pick up forks
+      const left = i; const right = (i+1)%dp.n;
+      if (dp.ordered){
+        // strict ordering: pick smaller index fork first -> prevents circular wait
+        const first = Math.min(left,right), second = Math.max(left,right);
+        await dp.forks[first].acquire();
+        await sleep(20);
+        await dp.forks[second].acquire();
+      } else {
+        // naive: pick left then right (can deadlock)
+        await dp.forks[left].acquire();
+        await sleep(20);
+        await dp.forks[right].acquire();
+      }
+      dp.philoStates[i].state = 'eating'; dp.render();
+      await sleep(dp.speed);
+      // release
+      dp.forks[left].release(); dp.forks[right].release();
+    }
+  },
+  render(){
+    const container = document.getElementById('dp-table');
+    container.innerHTML = '';
+    // place 5 philosophers
+    const cx=190, cy=190, r=140;
+    for(let i=0;i<dp.n;i++){
+      const angle = (i/ dp.n) * Math.PI*2 - Math.PI/2;
+      const x = cx + Math.cos(angle)*r - 45;
+      const y = cy + Math.sin(angle)*r - 45;
+      const el = document.createElement('div');
+      el.className='philo' + (dp.philoStates[i].state==='eating'?' on':'');
+      el.style.left = x+'px'; el.style.top = y+'px';
+      el.innerHTML = `
+        <div style="font-weight:700; font-size: 1.1rem;">P${i+1}</div>
+        <div style="font-size:12px; margin-top: 5px;">${dp.philoStates[i].state}</div>
+      `;
+      container.appendChild(el);
+      // forks (between i and i+1)
+      const forkAngle = angle + (Math.PI/ dp.n);
+      const fx = cx + Math.cos(forkAngle)*(r-60);
+      const fy = cy + Math.sin(forkAngle)*(r-60);
+      const fork = document.createElement('div');
+      fork.className='fork';
+      fork.style.left = (fx-7)+'px'; fork.style.top = (fy-32)+'px';
+      fork.style.transform = `rotate(${forkAngle}rad)`;
+      container.appendChild(fork);
+    }
+  }
+};
+
+/* -------------------------
+   Readers — Writers
+   ------------------------- */
+const rw = {
+  readers:0, writers:0, val:0, running:false, mode:'reader-pref', speed:600,
+  mutex: new Semaphore(1), writeLock: new Semaphore(1),
+  actors:[],
+  async readerLoop(id){
+    const actor = {id,type:'R',status:'idle'}; rw.actors.push(actor); renderRWList();
+    while(rw.running){
+      actor.status='want-read'; renderRWList();
+      if (rw.mode==='reader-pref'){
+        await rw.mutex.acquire();
+        rw.readers++; rw.mutex.release();
+      }
+      actor.status='reading'; 
+      document.getElementById('rw-status').textContent='Reading';
+      document.getElementById('rw-status').classList.add('active');
+      renderRWList();
+      await sleep(rw.speed);
+      actor.status='done'; renderRWList();
+      await rw.mutex.acquire(); rw.readers--; rw.mutex.release();
+      document.getElementById('rw-status').textContent='Idle';
+      document.getElementById('rw-status').classList.remove('active');
+      await sleep(200+Math.random()*rw.speed);
+    }
+    rw.actors = rw.actors.filter(a=>a!==actor); renderRWList();
+  },
+  async writerLoop(id){
+    const actor = {id,type:'W',status:'idle'}; rw.actors.push(actor); renderRWList();
+    while(rw.running){
+      actor.status='want-write'; renderRWList();
+      // writer needs exclusive access
+      await rw.writeLock.acquire();
+      actor.status='writing'; 
+      document.getElementById('rw-status').textContent='Writing';
+      document.getElementById('rw-status').classList.add('active');
+      renderRWList();
+      await sleep(rw.speed);
+      // modify shared val
+      rw.val += Math.floor(Math.random()*5)+1;
+      document.getElementById('shared-val').textContent = rw.val;
+      actor.status='done'; renderRWList();
+      rw.writeLock.release(); 
+      document.getElementById('rw-status').textContent='Idle';
+      document.getElementById('rw-status').classList.remove('active');
+      await sleep(200+Math.random()*rw.speed);
+    }
+    rw.actors = rw.actors.filter(a=>a!==actor); renderRWList();
+  }
+};
+
+function renderRWList(){
+  const el = document.getElementById('rw-list'); el.innerHTML='';
+  rw.actors.forEach(a=>{
+    const row = document.createElement('div'); 
+    row.className = `actor ${a.type === 'R' ? 'producer' : 'consumer'}`;
+    row.innerHTML = `
+      <div class="bubble">${a.type}</div>
+      <div>
+        <div style="font-weight:700; font-size: 0.95rem;">${a.type}${a.id}</div>
+        <div class="actor-status">${a.status}</div>
+      </div>
+    `;
+    el.appendChild(row);
+  });
+}
+
+/* -------------------------
+   Helpers & Controls
+   ------------------------- */
+function sleep(ms){ return new Promise(res=>setTimeout(res,ms)); }
+
+// Producer-Consumer Controls
+document.getElementById('pc-sync-toggle').addEventListener('click', ()=>{
+  pc.sync = !pc.sync;
+  const btn = document.getElementById('pc-sync-toggle');
+  btn.textContent = pc.sync ? 'ON' : 'OFF';
+  btn.classList.toggle('active', pc.sync);
+});
+
+document.getElementById('pc-start').addEventListener('click', async ()=>{
+  if (pc.running) return;
+  // init semaphores
+  pc.empty = new Semaphore(pc.bufferSize);
+  pc.full = new Semaphore(0);
+  pc.mutex = new Semaphore(1);
+  pc.running = true; pc.buffer=[]; renderBuffer();
+  // spawn initial producers/consumers
+  for(let i=0;i<pc.producers;i++) pc.producerLoop(i+1);
+  for(let j=0;j<pc.consumers;j++) pc.consumerLoop(j+1);
+});
+
+document.getElementById('pc-stop').addEventListener('click', ()=>{ 
+  pc.running=false; 
+  pc.actors=[]; 
+  renderPCActors(); 
+});
+
+document.getElementById('pc-speed').addEventListener('input', (e)=>pc.speed=parseInt(e.target.value));
+document.getElementById('pc-add-producer').addEventListener('click', ()=>{ pc.producers++; if(pc.running) pc.producerLoop(pc.producers);});
+document.getElementById('pc-add-consumer').addEventListener('click', ()=>{ pc.consumers++; if(pc.running) pc.consumerLoop(pc.consumers);});
+document.getElementById('pc-rem-producer').addEventListener('click', ()=>{ if(pc.producers>0) pc.producers--; });
+document.getElementById('pc-rem-consumer').addEventListener('click', ()=>{ if(pc.consumers>0) pc.consumers--; });
+
+// Dining Philosophers Controls
+document.getElementById('dp-start').addEventListener('click', ()=>{
+  if (dp.running) return;
+  dp.init();
+  dp.running = true;
+  for(let i=0;i<dp.n;i++) dp.philosopher(i);
+});
+
+document.getElementById('dp-stop').addEventListener('click', ()=>{ 
+  dp.running=false; 
+  dp.init(); 
+});
+
+document.getElementById('dp-mode-toggle').addEventListener('click', ()=>{
+  dp.ordered = !dp.ordered;
+  const btn = document.getElementById('dp-mode-toggle');
+  btn.textContent = dp.ordered ? 'ORDERED' : 'NAIVE';
+  btn.classList.toggle('active', dp.ordered);
+});
+
+document.getElementById('dp-speed').addEventListener('input', (e)=>dp.speed=parseInt(e.target.value));
+
+// Readers Writers Controls
+document.getElementById('rw-start').addEventListener('click', ()=>{
+  if (rw.running) return;
+  rw.running = true; 
+  rw.val=0; 
+  document.getElementById('shared-val').textContent = rw.val;
+});
+
+document.getElementById('rw-stop').addEventListener('click', ()=>{ 
+  rw.running=false; 
+  rw.actors=[]; 
+  renderRWList(); 
+});
+
+document.getElementById('rw-mode-toggle').addEventListener('click', ()=>{
+  rw.mode = (rw.mode==='reader-pref') ? 'writer-first' : 'reader-pref';
+  const btn = document.getElementById('rw-mode-toggle');
+  btn.textContent = rw.mode==='reader-pref' ? 'READER-PREF' : 'WRITER-FIRST';
+  btn.classList.toggle('active', rw.mode==='reader-pref');
+});
+
+document.getElementById('rw-add-reader').addEventListener('click', ()=>{ 
+  if(rw.running) rw.readerLoop(rw.actors.filter(a=>a.type==='R').length+1); 
+  else {rw.readers++; rw.readerLoop(rw.readers);} 
+});
+
+document.getElementById('rw-add-writer').addEventListener('click', ()=>{ 
+  if(rw.running) rw.writerLoop(rw.actors.filter(a=>a.type==='W').length+1); 
+  else {rw.writers++; rw.writerLoop(rw.writers);} 
+});
+
+document.getElementById('rw-rem-reader').addEventListener('click', ()=>{ 
+  if(rw.actors.length) {
+    const reader = rw.actors.find(a => a.type === 'R');
+    if (reader) rw.actors = rw.actors.filter(a => a !== reader);
+    renderRWList(); 
+  }
+});
+
+document.getElementById('rw-rem-writer').addEventListener('click', ()=>{ 
+  if(rw.actors.length) {
+    const writer = rw.actors.find(a => a.type === 'W');
+    if (writer) rw.actors = rw.actors.filter(a => a !== writer);
+    renderRWList(); 
+  }
+});
+
+document.getElementById('rw-speed').addEventListener('input', (e)=>rw.speed=parseInt(e.target.value));
+
+/* Initialize visuals */
+renderBuffer(); 
+dp.init();
+
+console.log("Synchronization Visualizer ready! Click Start buttons to begin simulations.");
+</script>
+</body>
+</html>

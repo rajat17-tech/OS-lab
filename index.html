@@ -1,0 +1,475 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Operating System Simulators Hub</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+
+    :root {
+      --primary: #4a6fa5;
+      --secondary: #6b7fd7;
+      --accent: #ff6f61;
+      --light: #f8f9fa;
+      --dark: #343a40;
+      --success: #28a745;
+      --warning: #ffc107;
+      --danger: #dc3545;
+      --gradient: linear-gradient(135deg, #4a6fa5, #6b7fd7, #4a6fa5);
+      --card-bg: #ffffff;
+      --text-color: #343a40;
+      --body-bg: linear-gradient(135deg, #f5f7fa 0%, #e4edf5 100%);
+      --footer-bg: #343a40;
+      --footer-text: #ffffff;
+    }
+
+    .dark-mode {
+      --primary: #6b8bc7;
+      --secondary: #8a9de8;
+      --accent: #ff8a7a;
+      --light: #2d3748;
+      --dark: #f8f9fa;
+      --card-bg: #2d3748;
+      --text-color: #e2e8f0;
+      --body-bg: linear-gradient(135deg, #1a202c 0%, #2d3748 100%);
+      --footer-bg: #1a202c;
+      --footer-text: #e2e8f0;
+    }
+
+    body {
+      background: var(--body-bg);
+      color: var(--text-color);
+      line-height: 1.6;
+      min-height: 100vh;
+      transition: all 0.3s ease;
+    }
+
+    header {
+      background: var(--gradient);
+      color: white;
+      padding: 2rem 1rem;
+      text-align: center;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+      position: relative;
+      overflow: hidden;
+    }
+
+    header::before {
+      content: "";
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1440 320'%3E%3Cpath fill='%23ffffff' fill-opacity='0.1' d='M0,96L48,112C96,128,192,160,288,186.7C384,213,480,235,576,213.3C672,192,768,128,864,128C960,128,1056,192,1152,192C1248,192,1344,128,1392,96L1440,64L1440,320L1392,320C1344,320,1248,320,1152,320C1056,320,960,320,864,320C768,320,672,320,576,320C480,320,384,320,288,320C192,320,96,320,48,320L0,320Z'%3E%3C/path%3E%3C/svg%3E");
+      background-size: cover;
+      background-position: center;
+    }
+
+    .header-content {
+      position: relative;
+      z-index: 1;
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+
+    h1 {
+      font-size: 3rem;
+      margin-bottom: 0.5rem;
+      text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
+    }
+
+    .subtitle {
+      font-size: 1.2rem;
+      opacity: 0.9;
+      max-width: 800px;
+      margin: 0 auto;
+    }
+
+    .container {
+      max-width: 1200px;
+      margin: 2rem auto;
+      padding: 0 1rem;
+    }
+
+    .intro {
+      text-align: center;
+      margin-bottom: 3rem;
+      padding: 2rem;
+      background: var(--card-bg);
+      border-radius: 12px;
+      box-shadow: 0 6px 15px rgba(0, 0, 0, 0.08);
+      transition: all 0.3s ease;
+    }
+
+    .intro h2 {
+      color: var(--primary);
+      margin-bottom: 1rem;
+    }
+
+    .intro p {
+      max-width: 800px;
+      margin: 0 auto;
+      font-size: 1.1rem;
+    }
+
+    .simulators-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 2rem;
+      margin-bottom: 3rem;
+    }
+
+    .simulator-card {
+      background: var(--card-bg);
+      border-radius: 12px;
+      overflow: hidden;
+      box-shadow: 0 6px 15px rgba(0, 0, 0, 0.08);
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+      display: flex;
+      flex-direction: column;
+      height: 100%;
+    }
+
+    .simulator-card:hover {
+      transform: translateY(-10px);
+      box-shadow: 0 12px 20px rgba(0, 0, 0, 0.15);
+    }
+
+    .card-header {
+      padding: 1.5rem;
+      background: var(--gradient);
+      color: white;
+      text-align: center;
+    }
+
+    .card-header i {
+      font-size: 2.5rem;
+      margin-bottom: 0.5rem;
+    }
+
+    .card-header h3 {
+      font-size: 1.5rem;
+      margin: 0;
+    }
+
+    .card-body {
+      padding: 1.5rem;
+      flex-grow: 1;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .card-body p {
+      margin-bottom: 1.5rem;
+      flex-grow: 1;
+    }
+
+    .features {
+      margin-bottom: 1.5rem;
+    }
+
+    .features h4 {
+      margin-bottom: 0.5rem;
+      color: var(--primary);
+    }
+
+    .features ul {
+      list-style-type: none;
+      padding-left: 0;
+    }
+
+    .features li {
+      padding: 0.3rem 0;
+      position: relative;
+      padding-left: 1.5rem;
+    }
+
+    .features li::before {
+      content: "✓";
+      color: var(--success);
+      position: absolute;
+      left: 0;
+      font-weight: bold;
+    }
+
+    .btn {
+      display: inline-block;
+      padding: 0.8rem 1.5rem;
+      background: var(--accent);
+      color: white;
+      text-decoration: none;
+      border-radius: 50px;
+      font-weight: 600;
+      text-align: center;
+      transition: all 0.3s ease;
+      border: none;
+      cursor: pointer;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    }
+
+    .btn:hover {
+      background: #e55a50;
+      transform: translateY(-2px);
+      box-shadow: 0 6px 8px rgba(0, 0, 0, 0.15);
+    }
+
+    .btn i {
+      margin-right: 0.5rem;
+    }
+
+    footer {
+      background: var(--footer-bg);
+      color: var(--footer-text);
+      text-align: center;
+      padding: 2rem 1rem;
+      margin-top: 3rem;
+    }
+
+    .footer-content {
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+
+    .footer-links {
+      display: flex;
+      justify-content: center;
+      gap: 2rem;
+      margin: 1.5rem 0;
+    }
+
+    .footer-links a {
+      color: var(--footer-text);
+      text-decoration: none;
+      transition: color 0.3s ease;
+    }
+
+    .footer-links a:hover {
+      color: var(--accent);
+    }
+
+    .copyright {
+      margin-top: 1rem;
+      opacity: 0.7;
+      font-size: 0.9rem;
+    }
+
+    .theme-toggle {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      background: var(--card-bg);
+      border: none;
+      border-radius: 50%;
+      width: 50px;
+      height: 50px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+      z-index: 100;
+      transition: all 0.3s ease;
+    }
+
+    .theme-toggle:hover {
+      transform: scale(1.1);
+    }
+
+    .theme-toggle i {
+      font-size: 1.5rem;
+      color: var(--primary);
+    }
+
+    .developers {
+      text-align: center;
+      margin: 1rem 0;
+      font-style: italic;
+      color: var(--primary);
+      font-weight: 600;
+    }
+
+    @media (max-width: 768px) {
+      h1 {
+        font-size: 2.2rem;
+      }
+      
+      .simulators-grid {
+        grid-template-columns: 1fr;
+      }
+      
+      .footer-links {
+        flex-direction: column;
+        gap: 1rem;
+      }
+      
+      .theme-toggle {
+        top: 10px;
+        right: 10px;
+        width: 40px;
+        height: 40px;
+      }
+      
+      .theme-toggle i {
+        font-size: 1.2rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <button class="theme-toggle" id="themeToggle">
+    <i class="fas fa-moon"></i>
+  </button>
+
+  <header>
+    <div class="header-content">
+      <h1>Operating System Simulators Hub</h1>
+      <p class="subtitle">Interactive visualizations of core OS concepts including CPU scheduling, synchronization, and system architecture</p>
+      <div class="developers">Developed by Rajat & Moksha</div>
+    </div>
+  </header>
+
+  <div class="container">
+    <section class="intro">
+      <h2>Learn Operating Systems Through Interactive Simulations</h2>
+      <p>This collection of simulators helps students and enthusiasts understand fundamental operating system concepts through hands-on visualization. Each tool demonstrates a different aspect of OS functionality with real-time feedback and visual representations.</p>
+    </section>
+
+    <div class="simulators-grid">
+      <!-- CPU Scheduling Simulator -->
+      <div class="simulator-card">
+        <div class="card-header">
+          <i class="fas fa-microchip"></i>
+          <h3>CPU Scheduling Simulator</h3>
+        </div>
+        <div class="card-body">
+          <p>Visualize and compare First-Come-First-Served (FCFS) and Shortest-Job-First (SJF) CPU scheduling algorithms with interactive Gantt charts.</p>
+          <div class="features">
+            <h4>Key Features:</h4>
+            <ul>
+              <li>FCFS and SJF algorithms</li>
+              <li>Interactive Gantt charts</li>
+              <li>Waiting and turnaround time calculations</li>
+              <li>Process table visualization</li>
+            </ul>
+          </div>
+          <a href="cpu-scheduler.html" class="btn"><i class="fas fa-play-circle"></i> Launch Simulator</a>
+        </div>
+      </div>
+
+      <!-- OS Visual Guide -->
+      <div class="simulator-card">
+        <div class="card-header">
+          <i class="fas fa-book-open"></i>
+          <h3>OS Visual Guide</h3>
+        </div>
+        <div class="card-body">
+          <p>Explore OS booting processes, types of operating systems, and system calls through interactive visualizations and explanations.</p>
+          <div class="features">
+            <h4>Key Features:</h4>
+            <ul>
+              <li>Booting process visualization</li>
+              <li>OS types comparison</li>
+              <li>Interactive system calls</li>
+              <li>System call logging</li>
+            </ul>
+          </div>
+          <a href="os-demo1.html" class="btn"><i class="fas fa-play-circle"></i> Launch Simulator</a>
+        </div>
+      </div>
+
+      <!-- RMS & EDF Scheduler -->
+      <div class="simulator-card">
+        <div class="card-header">
+          <i class="fas fa-tasks"></i>
+          <h3>RMS & EDF Scheduler</h3>
+        </div>
+        <div class="card-body">
+          <p>Compare Rate Monotonic Scheduling (RMS) and Earliest Deadline First (EDF) algorithms for real-time systems with thread demonstrations.</p>
+          <div class="features">
+            <h4>Key Features:</h4>
+            <ul>
+              <li>RMS and EDF algorithms</li>
+              <li>Task period and execution time</li>
+              <li>Thread visualization</li>
+              <li>Real-time scheduling simulation</li>
+            </ul>
+          </div>
+          <a href="rms-edf-scheduler.html" class="btn"><i class="fas fa-play-circle"></i> Launch Simulator</a>
+        </div>
+      </div>
+
+      <!-- Synchronization Simulator -->
+      <div class="simulator-card">
+        <div class="card-header">
+          <i class="fas fa-cogs"></i>
+          <h3>Synchronization Simulator</h3>
+        </div>
+        <div class="card-body">
+          <p>Visualize classic synchronization problems including Producer-Consumer, Dining Philosophers, and Readers-Writers with configurable parameters.</p>
+          <div class="features">
+            <h4>Key Features:</h4>
+            <ul>
+              <li>Producer-Consumer problem</li>
+              <li>Dining Philosophers problem</li>
+              <li>Readers-Writers problem</li>
+              <li>Sync vs. naive mode comparison</li>
+            </ul>
+          </div>
+          <a href="sync-sim.html" class="btn"><i class="fas fa-play-circle"></i> Launch Simulator</a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <footer>
+    <div class="footer-content">
+      <p>Operating System Simulators Hub - Educational Tools for Understanding OS Concepts</p>
+      <div class="footer-links">
+        <a href="#"><i class="fas fa-info-circle"></i> About</a>
+        <a href="#"><i class="fas fa-envelope"></i> Contact</a>
+        <a href="#"><i class="fas fa-code"></i> Source Code</a>
+      </div>
+      <p class="copyright">© 2025 OS Simulators Hub. Developed by Rajat & Moksha. All simulators created for educational purposes.</p>
+    </div>
+  </footer>
+
+  <script>
+    // Theme toggle functionality
+    const themeToggle = document.getElementById('themeToggle');
+    const themeIcon = themeToggle.querySelector('i');
+    
+    // Check for saved theme preference or default to classic
+    const currentTheme = localStorage.getItem('theme') || 'classic';
+    
+    // Apply the saved theme on page load
+    if (currentTheme === 'dark') {
+      document.body.classList.add('dark-mode');
+      themeIcon.classList.remove('fa-moon');
+      themeIcon.classList.add('fa-sun');
+    }
+    
+    // Toggle theme when button is clicked
+    themeToggle.addEventListener('click', () => {
+      document.body.classList.toggle('dark-mode');
+      
+      if (document.body.classList.contains('dark-mode')) {
+        themeIcon.classList.remove('fa-moon');
+        themeIcon.classList.add('fa-sun');
+        localStorage.setItem('theme', 'dark');
+      } else {
+        themeIcon.classList.remove('fa-sun');
+        themeIcon.classList.add('fa-moon');
+        localStorage.setItem('theme', 'classic');
+      }
+    });
+  </script>
+</body>
+</html>

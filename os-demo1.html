@@ -1,0 +1,745 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Operating System Visual Guide</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    :root {
+      --primary: #7e57c2;
+      --secondary: #26a69a;
+      --accent: #ff7043;
+      --light: #f5f3ff;
+      --dark: #1a237e;
+      --gradient: linear-gradient(135deg, #7e57c2, #26a69a, #ff7043);
+      --glass: rgba(255, 255, 255, 0.7);
+      --shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+      --radius: 16px;
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: linear-gradient(to bottom right, #eff6ff, #fce7f3, #f5f3ff);
+      color: #333;
+      line-height: 1.6;
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 20px;
+    }
+
+    /* Header Styles */
+    header {
+      background: var(--gradient);
+      color: white;
+      padding: 4rem 1rem;
+      border-bottom-left-radius: 3rem;
+      border-bottom-right-radius: 3rem;
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+    }
+
+    header::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" preserveAspectRatio="none"><path d="M0,0 L100,0 L100,100 Z" fill="rgba(255,255,255,0.1)"/></svg>');
+      background-size: cover;
+    }
+
+    header h1 {
+      font-size: 3.5rem;
+      font-weight: 800;
+      margin-bottom: 0.5rem;
+      position: relative;
+      text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
+    }
+
+    header p {
+      font-size: 1.3rem;
+      opacity: 0.9;
+      position: relative;
+      max-width: 600px;
+      margin: 0 auto;
+    }
+
+    /* Section Styles */
+    section {
+      margin: 4rem auto;
+      padding: 0 1rem;
+    }
+
+    h2 {
+      font-size: 2.2rem;
+      margin-bottom: 2rem;
+      color: var(--dark);
+      text-align: center;
+      position: relative;
+      display: inline-block;
+    }
+
+    h2::after {
+      content: '';
+      position: absolute;
+      bottom: -10px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 80px;
+      height: 4px;
+      background: var(--gradient);
+      border-radius: 2px;
+    }
+
+    /* Card Styles */
+    .card {
+      background: var(--glass);
+      backdrop-filter: blur(20px);
+      border-radius: var(--radius);
+      border: 1px solid rgba(255, 255, 255, 0.3);
+      box-shadow: var(--shadow);
+      transition: transform 0.3s, box-shadow 0.3s;
+      overflow: hidden;
+    }
+
+    .card:hover {
+      transform: translateY(-10px);
+      box-shadow: 0 15px 40px rgba(0, 0, 0, 0.2);
+    }
+
+    /* Booting Process */
+    .booting-process {
+      background: white;
+      padding: 2.5rem;
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+    }
+
+    .process-steps {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-top: 2rem;
+      position: relative;
+    }
+
+    .process-step {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+      z-index: 2;
+      flex: 1;
+    }
+
+    .step-icon {
+      width: 70px;
+      height: 70px;
+      border-radius: 50%;
+      background: var(--gradient);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-size: 1.8rem;
+      margin-bottom: 1rem;
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+    }
+
+    .step-label {
+      font-weight: 600;
+      color: var(--dark);
+      margin-bottom: 0.5rem;
+    }
+
+    .step-desc {
+      font-size: 0.9rem;
+      color: #666;
+      max-width: 150px;
+    }
+
+    .process-connector {
+      position: absolute;
+      top: 35px;
+      left: 0;
+      right: 0;
+      height: 4px;
+      background: linear-gradient(to right, #7e57c2, #26a69a, #ff7043);
+      z-index: 1;
+    }
+
+    /* OS Types Grid */
+    .os-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 2rem;
+    }
+
+    .os-card {
+      padding: 2rem;
+      text-align: center;
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .os-card i {
+      font-size: 2.5rem;
+      margin-bottom: 1rem;
+      background: var(--gradient);
+      -webkit-background-clip: text;
+      background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .os-card h3 {
+      margin-bottom: 1rem;
+      color: var(--dark);
+      font-size: 1.3rem;
+    }
+
+    .os-card p {
+      color: #555;
+      line-height: 1.5;
+    }
+
+    /* Tabs */
+    .tabs-container {
+      background: white;
+      border-radius: var(--radius);
+      overflow: hidden;
+      box-shadow: var(--shadow);
+    }
+
+    .tabs {
+      display: flex;
+      background: linear-gradient(to right, #f8f9fa, #e9ecef);
+      border-bottom: 1px solid #dee2e6;
+    }
+
+    .tab-btn {
+      flex: 1;
+      padding: 1.2rem 2rem;
+      border: none;
+      background: transparent;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s;
+      color: #6c757d;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .tab-btn::before {
+      content: '';
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      width: 100%;
+      height: 0;
+      background: var(--gradient);
+      transition: height 0.3s;
+      z-index: 1;
+    }
+
+    .tab-btn.active {
+      color: white;
+    }
+
+    .tab-btn.active::before {
+      height: 100%;
+    }
+
+    .tab-btn span {
+      position: relative;
+      z-index: 2;
+    }
+
+    .tab-content {
+      padding: 2.5rem;
+    }
+
+    .tab-pane {
+      display: none;
+    }
+
+    .tab-pane.active {
+      display: block;
+      animation: fadeIn 0.5s;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+
+    .action-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 1.5rem;
+      margin-top: 1.5rem;
+    }
+
+    .action-btn {
+      padding: 1.2rem 1.5rem;
+      border-radius: 12px;
+      font-weight: 600;
+      color: white;
+      cursor: pointer;
+      transition: all 0.3s;
+      text-align: center;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+    }
+
+    .action-btn:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+    }
+
+    .action-btn i {
+      font-size: 1.8rem;
+      margin-bottom: 0.5rem;
+    }
+
+    /* Log Box */
+    .log-container {
+      background: rgba(0, 0, 0, 0.85);
+      border-radius: var(--radius);
+      padding: 2rem;
+      box-shadow: var(--shadow);
+      color: white;
+    }
+
+    .log-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1.5rem;
+    }
+
+    .log-box {
+      background: rgba(0, 0, 0, 0.7);
+      color: #bbf7d0;
+      border: 1px solid #22c55e;
+      border-radius: 12px;
+      padding: 1.5rem;
+      height: 250px;
+      overflow-y: auto;
+      font-family: 'Courier New', monospace;
+      font-size: 0.95rem;
+      line-height: 1.5;
+    }
+
+    .log-entry {
+      margin-bottom: 0.8rem;
+      padding-bottom: 0.8rem;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .log-time {
+      color: #60a5fa;
+      font-weight: bold;
+    }
+
+    .log-type {
+      display: inline-block;
+      padding: 0.2rem 0.6rem;
+      border-radius: 20px;
+      font-size: 0.8rem;
+      font-weight: bold;
+      margin-right: 0.5rem;
+    }
+
+    .log-type.process {
+      background: #3b82f6;
+      color: white;
+    }
+
+    .log-type.file {
+      background: #10b981;
+      color: white;
+    }
+
+    .log-type.device {
+      background: #8b5cf6;
+      color: white;
+    }
+
+    .btn {
+      padding: 0.8rem 1.5rem;
+      border-radius: 50px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s;
+      border: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .btn-primary {
+      background: var(--gradient);
+      color: white;
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+    }
+
+    .btn-primary:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
+    }
+
+    /* Footer */
+    footer {
+      margin-top: 5rem;
+      background: var(--gradient);
+      color: white;
+      text-align: center;
+      padding: 3rem 1rem;
+      border-top-left-radius: 3rem;
+      border-top-right-radius: 3rem;
+    }
+
+    footer p {
+      font-size: 1.1rem;
+      opacity: 0.9;
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+      header h1 {
+        font-size: 2.5rem;
+      }
+      
+      .process-steps {
+        flex-direction: column;
+        gap: 2rem;
+      }
+      
+      .process-connector {
+        display: none;
+      }
+      
+      .tabs {
+        flex-direction: column;
+      }
+      
+      .action-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Header -->
+  <header>
+    <div class="container">
+      <h1><i class="fas fa-laptop-code"></i> Operating System Visual Guide</h1>
+      <p>Explore the inner workings of operating systems through interactive visualizations</p>
+    </div>
+  </header>
+
+  <main class="container">
+    <!-- Booting Process -->
+    <section>
+      <h2>🔄 Booting Process</h2>
+      <div class="booting-process card">
+        <p style="text-align: center; margin-bottom: 1.5rem; color: #555;">
+          The booting process is the sequence of events that occurs from the moment you turn on your computer until the operating system is fully loaded.
+        </p>
+        
+        <div class="process-steps">
+          <div class="process-connector"></div>
+          
+          <div class="process-step">
+            <div class="step-icon">
+              <i class="fas fa-power-off"></i>
+            </div>
+            <div class="step-label">BIOS/UEFI</div>
+            <div class="step-desc">Initializes hardware and performs self-test</div>
+          </div>
+          
+          <div class="process-step">
+            <div class="step-icon">
+              <i class="fas fa-microchip"></i>
+            </div>
+            <div class="step-label">POST</div>
+            <div class="step-desc">Power-On Self-Test checks system components</div>
+          </div>
+          
+          <div class="process-step">
+            <div class="step-icon">
+              <i class="fas fa-hdd"></i>
+            </div>
+            <div class="step-label">Bootloader</div>
+            <div class="step-desc">Loads the operating system kernel into memory</div>
+          </div>
+          
+          <div class="process-step">
+            <div class="step-icon">
+              <i class="fas fa-cogs"></i>
+            </div>
+            <div class="step-label">Kernel Load</div>
+            <div class="step-desc">OS kernel takes control of the system</div>
+          </div>
+          
+          <div class="process-step">
+            <div class="step-icon">
+              <i class="fas fa-play-circle"></i>
+            </div>
+            <div class="step-label">Init</div>
+            <div class="step-desc">Initializes system services and user interface</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- OS Types -->
+    <section>
+      <h2>🖥️ Types of Operating Systems</h2>
+      <div class="os-grid">
+        <div class="os-card card">
+          <i class="fas fa-server"></i>
+          <h3>Batch OS</h3>
+          <p>Executes jobs in batches without user interaction. Ideal for repetitive tasks.</p>
+        </div>
+        <div class="os-card card">
+          <i class="fas fa-users"></i>
+          <h3>Time-Sharing OS</h3>
+          <p>Allows multiple users to share system resources simultaneously.</p>
+        </div>
+        <div class="os-card card">
+          <i class="fas fa-network-wired"></i>
+          <h3>Distributed OS</h3>
+          <p>Manages a group of independent computers as a single system.</p>
+        </div>
+        <div class="os-card card">
+          <i class="fas fa-wifi"></i>
+          <h3>Network OS</h3>
+          <p>Provides services over a network and manages network resources.</p>
+        </div>
+        <div class="os-card card">
+          <i class="fas fa-bolt"></i>
+          <h3>Real-Time OS</h3>
+          <p>Processes tasks with precise timing constraints for critical applications.</p>
+        </div>
+        <div class="os-card card">
+          <i class="fas fa-mobile-alt"></i>
+          <h3>Mobile OS</h3>
+          <p>Optimized for handheld devices with touch interfaces and mobility.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- System Calls -->
+    <section>
+      <h2>⚙️ Interactive System Calls</h2>
+      <div class="tabs-container">
+        <div class="tabs">
+          <button class="tab-btn active" data-tab="process">
+            <span><i class="fas fa-tasks"></i> Process Management</span>
+          </button>
+          <button class="tab-btn" data-tab="file">
+            <span><i class="fas fa-file"></i> File Management</span>
+          </button>
+          <button class="tab-btn" data-tab="device">
+            <span><i class="fas fa-print"></i> Device Management</span>
+          </button>
+        </div>
+        
+        <div class="tab-content">
+          <div id="process-tab" class="tab-pane active">
+            <h3 style="color: #3b82f6; margin-bottom: 1.5rem;">Process Management System Calls</h3>
+            <p style="margin-bottom: 1.5rem; color: #555;">
+              Process management system calls handle the creation, execution, and termination of processes.
+            </p>
+            <div class="action-grid">
+              <div class="action-btn" style="background: linear-gradient(to right, #3b82f6, #1d4ed8);" onclick="addLog('Process', 'Created new process (PID: ' + Math.floor(Math.random()*1000) + ')')">
+                <i class="fas fa-plus-circle"></i>
+                <span>Create Process</span>
+              </div>
+              <div class="action-btn" style="background: linear-gradient(to right, #ef4444, #b91c1c);" onclick="addLog('Process', 'Terminated process (PID: ' + Math.floor(Math.random()*1000) + ')')">
+                <i class="fas fa-skull-crossbones"></i>
+                <span>Kill Process</span>
+              </div>
+              <div class="action-btn" style="background: linear-gradient(to right, #f59e0b, #d97706);" onclick="addLog('Process', 'Scheduled process for execution')">
+                <i class="fas fa-play-circle"></i>
+                <span>Schedule Process</span>
+              </div>
+              <div class="action-btn" style="background: linear-gradient(to right, #8b5cf6, #7c3aed);" onclick="addLog('Process', 'Changed process priority')">
+                <i class="fas fa-sort-amount-up"></i>
+                <span>Change Priority</span>
+              </div>
+            </div>
+          </div>
+          
+          <div id="file-tab" class="tab-pane">
+            <h3 style="color: #10b981; margin-bottom: 1.5rem;">File Management System Calls</h3>
+            <p style="margin-bottom: 1.5rem; color: #555;">
+              File management system calls handle file operations like creating, reading, writing, and deleting files.
+            </p>
+            <div class="action-grid">
+              <div class="action-btn" style="background: linear-gradient(to right, #10b981, #047857);" onclick="addLog('File', 'Opened file: document.txt')">
+                <i class="fas fa-folder-open"></i>
+                <span>Open File</span>
+              </div>
+              <div class="action-btn" style="background: linear-gradient(to right, #f59e0b, #d97706);" onclick="addLog('File', 'Saved changes to file: document.txt')">
+                <i class="fas fa-save"></i>
+                <span>Save File</span>
+              </div>
+              <div class="action-btn" style="background: linear-gradient(to right, #3b82f6, #1d4ed8);" onclick="addLog('File', 'Created new file: notes.txt')">
+                <i class="fas fa-file-plus"></i>
+                <span>Create File</span>
+              </div>
+              <div class="action-btn" style="background: linear-gradient(to right, #ef4444, #b91c1c);" onclick="addLog('File', 'Deleted file: temp.txt')">
+                <i class="fas fa-trash-alt"></i>
+                <span>Delete File</span>
+              </div>
+            </div>
+          </div>
+          
+          <div id="device-tab" class="tab-pane">
+            <h3 style="color: #8b5cf6; margin-bottom: 1.5rem;">Device Management System Calls</h3>
+            <p style="margin-bottom: 1.5rem; color: #555;">
+              Device management system calls handle the allocation and deallocation of devices to processes.
+            </p>
+            <div class="action-grid">
+              <div class="action-btn" style="background: linear-gradient(to right, #8b5cf6, #7c3aed);" onclick="addLog('Device', 'Printer allocated to process')">
+                <i class="fas fa-print"></i>
+                <span>Allocate Printer</span>
+              </div>
+              <div class="action-btn" style="background: linear-gradient(to right, #ec4899, #be185d);" onclick="addLog('Device', 'Printer released from process')">
+                <i class="fas fa-times-circle"></i>
+                <span>Release Printer</span>
+              </div>
+              <div class="action-btn" style="background: linear-gradient(to right, #3b82f6, #1d4ed8);" onclick="addLog('Device', 'Scanner allocated to process')">
+                <i class="fas fa-scanner"></i>
+                <span>Allocate Scanner</span>
+              </div>
+              <div class="action-btn" style="background: linear-gradient(to right, #10b981, #047857);" onclick="addLog('Device', 'USB device mounted successfully')">
+                <i class="fas fa-usb"></i>
+                <span>Mount Device</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Logs -->
+    <section>
+      <div class="log-container card">
+        <div class="log-header">
+          <h3 style="color: #bbf7d0;"><i class="fas fa-terminal"></i> System Call Log</h3>
+          <button id="clearLog" class="btn btn-primary">
+            <i class="fas fa-broom"></i> Clear Log
+          </button>
+        </div>
+        <div id="log" class="log-box">
+          <!-- Log entries will be added here -->
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <div class="container">
+      <p>© 2025 OS Visual Guide · Made with ♥️ using HTML, CSS & JavaScript</p>
+    </div>
+  </footer>
+
+  <script>
+    const logBox = document.getElementById("log");
+    const clearBtn = document.getElementById("clearLog");
+    const tabBtns = document.querySelectorAll(".tab-btn");
+    let log = [];
+
+    function addLog(type, msg) {
+      const ts = new Date().toLocaleTimeString();
+      const logEntry = {
+        type,
+        msg,
+        timestamp: ts
+      };
+      log.push(logEntry);
+      renderLog();
+    }
+
+    function renderLog() {
+      if (log.length === 0) {
+        logBox.innerHTML = '<div class="log-entry">System logs will appear here as you interact with system calls...</div>';
+        return;
+      }
+      
+      logBox.innerHTML = log.map(entry => `
+        <div class="log-entry">
+          <span class="log-time">[${entry.timestamp}]</span>
+          <span class="log-type ${entry.type.toLowerCase()}">${entry.type}</span>
+          ${entry.msg}
+        </div>
+      `).join("");
+      
+      // Scroll to bottom
+      logBox.scrollTop = logBox.scrollHeight;
+    }
+
+    function switchTab(tabName) {
+      // Hide all tab panes
+      document.querySelectorAll('.tab-pane').forEach(pane => {
+        pane.classList.remove('active');
+      });
+      
+      // Show selected tab pane
+      document.getElementById(`${tabName}-tab`).classList.add('active');
+      
+      // Update tab buttons
+      tabBtns.forEach(btn => {
+        btn.classList.remove('active');
+        if (btn.dataset.tab === tabName) {
+          btn.classList.add('active');
+        }
+      });
+    }
+
+    // Event listeners
+    clearBtn.addEventListener("click", () => {
+      log = [];
+      renderLog();
+    });
+
+    tabBtns.forEach(btn => {
+      btn.addEventListener("click", () => {
+        switchTab(btn.dataset.tab);
+      });
+    });
+
+    // Add some initial log entries for demonstration
+    window.addEventListener('DOMContentLoaded', () => {
+      addLog('System', 'OS Visual Guide initialized successfully');
+      addLog('System', 'All components loaded and ready');
+      renderLog();
+    });
+  </script>
+
+</body>
+</html>
